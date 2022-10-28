@@ -1,0 +1,13 @@
+# Auto detect text files and perform LF normalization
+* text=auto
+# code
+*.py text eol=lf
+# other text
+*.md text eol=lf
+*.map text eol=lf
+*.log text eol=lf
+# binaries
+*.dll binary
+*.dylib binary
+*.so binary
+*.zip binary
