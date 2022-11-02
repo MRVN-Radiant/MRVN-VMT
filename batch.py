@@ -16,14 +16,15 @@ from VTFLibWrapper import VTFLib  # need appropriate compiled VTFLib
 # see VTFLibWrapper/README.md for links to Linux version
 
 
-__version__ = "1.0.0"
+__version__ = "1.1.0"
 # NOTE: cannot be bothered to convert .vmt proxies
 # TODO: Titanfall 2 rpak .json materials -> .shader
 
 
 patterns = {"alphatest": re.compile(r'\s"\$alphatest"\s1'),
             "basetexture": re.compile(r'\s"\$basetexture"\s"(.*)"'),
-            "tooltexture": re.compile(r'\s%tooltexture\s"(.*)"')}
+            "tooltexture": re.compile(r'\s%tooltexture\s"(.*)"'),
+            "translucent": re.compile(r'\s"\$translucent"\s"1"')}
 
 
 class VMT:
@@ -36,14 +37,18 @@ class VMT:
         out = cls()
         with open(filename) as vmt_file:
             for line in vmt_file:
-                if re.match(patterns["alphatest"], line) is not None:
-                    out.is_trans = True
-                match = re.match(patterns["basetexture"], line)
-                if match is not None:
-                    out.basetexture = match.groups()[0]
-                match = re.match(patterns["tooltexture"], line)
-                if match is not None:
-                    out.tooltexture = match.groups()[0]
+                for check, pattern in patterns.items():
+                    match = re.match(pattern, line)
+                    if match is None:
+                        continue
+                    if check in ("alphatest", "translucent"):
+                        out.is_trans = True
+                    elif check == "basetexture":
+                        out.basetexture = match.groups()[0]
+                    elif check == "tooltexture":
+                        out.tooltexture = match.groups()[0]
+                    else:
+                        raise NotImplementedError(f"i forgor {check}")
         return out
 
 
@@ -60,17 +65,15 @@ def filename(folder: str, base: str, ext: str) -> str:
     return os.path.join(folder, f"{base}.{ext}")
 
 
-# TODO: textures -> shader_names for TrenchBroom
-def convert_folder(materials_dir: str, MRVN_dir: str, MRVN_game: str,
-                   recursive=False, subfolder: str = "", verbose=False):
-    # e.g. "../titanfall1_extracted_textures", "C:/MRVN-radiant", "titanfallonline"
-    materials_dir = os.path.realpath(materials_dir)
-    MRVN_dir = os.path.realpath(MRVN_dir)
-    scripts_dir = os.path.join(MRVN_dir, MRVN_game, "scripts")
-    textures_dir = os.path.join(MRVN_dir, MRVN_game, "textures")
-    # NOTE: just directly grab all the world textures
-    top_folder = os.path.join(materials_dir, "world", subfolder)
-    for folder in os.listdir(os.path.join(materials_dir, "world", subfolder)):
+# MRVN-radiant
+def convert_folder(materials_dir: str, titanfall_dir: str, subfolder: str = "", recurse=False, verbose=False):
+    # e.g. "../titanfall1_extracted_textures", "C:/MRVN-radiant/titanfallonline"
+    materials_dir = os.path.realpath(materials_dir)  # src
+    titanfall_dir = os.path.realpath(titanfall_dir)  # dest
+    scripts_dir = os.path.join(titanfall_dir, "scripts")
+    textures_dir = os.path.join(titanfall_dir, "textures")
+    top_folder = os.path.join(materials_dir, subfolder)
+    for folder in os.listdir(top_folder):
         vmt_folder = os.path.join(top_folder, folder)
         if not os.path.isdir(vmt_folder):
             continue
@@ -87,17 +90,15 @@ def convert_folder(materials_dir: str, MRVN_dir: str, MRVN_game: str,
                 if verbose:
                     print(f"!!! {vmt_filename} has no texture !!!")
                 continue
-            shader_name = os.path.join("textures", "world", subfolder, folder, vmt_filename[:-4])
+            shader_name = os.path.join("textures", subfolder, folder, vmt_filename[:-4])
             shader_file.write(f"\n{shader_name}\n" + "{\n")
-            # shader_file.write(f"\tqer_editorimage {shader_name}.tga\n")
             texture = vmt.basetexture if vmt.tooltexture is None else vmt.tooltexture
             shader_file.write(f"\tqer_editorimage {os.path.join('textures', texture)}.tga\n")
             # TODO: convert as much of the shader as possible
             if vmt.is_trans:
-                # NOTE: should really target basetexture, but we rename it later
-                shader_file.write("\t{\n\t\tmap " + os.path.join("textures", shader_name) + ".tga\n")
+                shader_file.write("\tqer_trans 1.00\n")  # use texture alpha
                 # shader_file.write("\t{\n\t\tmap " + os.path.join("textures", vmt.basetexture) + ".tga\n")
-                shader_file.write("\t\tblendFunc GL_SRC_ALPHA GL_ONE_MINUS_SRC_ALPHA\n\t}\n")
+                # shader_file.write("\t\tblendFunc GL_SRC_ALPHA GL_ONE_MINUS_SRC_ALPHA\n\t}\n")
             shader_file.write("}\n")
             # .vtf
             vtf_filename = filename(materials_dir, texture, "vtf")
@@ -117,24 +118,62 @@ def convert_folder(materials_dir: str, MRVN_dir: str, MRVN_game: str,
             print(f"--- {count} materials converted")
         if count == 0:
             os.remove(os.path.realpath(shader_file.name))
-        if recursive:
-            convert_folder(materials_dir, MRVN_dir, MRVN_game, True, os.path.join(subfolder, folder), verbose=verbose)
+        if recurse:
+            convert_folder(materials_dir, titanfall_dir, os.path.join(subfolder, folder), True, verbose=verbose)
+
+
+# TrenchBroom
+def convert_folder_trenchbroom(materials_dir: str, tga_dir: str, subfolder: str = "", recurse=False, verbose=False):
+    # e.g. "../titanfall1_extracted_textures", ".../TrenchBroom maps/Titanfall/textures"
+    # NOTE: subfolder should be a subfolder of materials
+    # NOTE: no .shader; straight to 1 .tga per material name
+    materials_dir = os.path.realpath(materials_dir)  # src
+    tga_dir = os.path.realpath(tga_dir)  # dest
+    top_folder = os.path.join(materials_dir, subfolder)
+    for folder in os.listdir(top_folder):
+        vmt_folder = os.path.join(top_folder, folder)
+        if not os.path.isdir(vmt_folder):
+            continue
+        count = 0
+        for vmt_filename in fnmatch.filter(os.listdir(vmt_folder), "*.vmt"):
+            # .vmt
+            vmt = VMT.from_file(os.path.join(vmt_folder, vmt_filename))
+            if vmt.basetexture == "" and vmt.tooltexture is None:
+                if verbose:
+                    print(f"!!! {vmt_filename} has no texture !!!")
+                continue
+            shader_name = os.path.join("textures", "world", subfolder, folder, vmt_filename[:-4])
+            texture = vmt.basetexture if vmt.tooltexture is None else vmt.tooltexture
+            # .vtf
+            vtf_filename = filename(materials_dir, texture, "vtf")
+            if not os.path.exists(vtf_filename):
+                if verbose:
+                    print(f"!!! {vmt_filename} texture {texture} not found !!!")
+                continue
+            vtf_to_tga(vtf_filename, filename(tga_dir, shader_name, "tga"))
+            count += 1
+        if verbose:
+            print(f"--- {count} materials converted")
+        if recurse:
+            convert_folder_trenchbroom(materials_dir, tga_dir, True, os.path.join(subfolder, folder), verbose=verbose)
 
 
 if __name__ == "__main__":
     import sys
 
     # materials_dir = "E:/Mod/TitanfallOnline/TitanFallOnline/assets_dump/materials"
-    # MRVN_dir = "E:/Mod/_tools/Source Engine - Respawn/MRVN-radiant-3db242a-Windows-x86_64"
+    # titanfall_dir = "E:/Mod/_tools/Source Engine - Respawn/MRVN-radiant-3db242a-Windows-x86_64/titanfallonline"
     if len(sys.argv) == 3:
-        materials_dir, MRVN_dir = sys.argv[1:]
+        materials_dir, titanfall_dir = sys.argv[1:]
     # elif len(sys.argv) == 1:
     #     pass  # use defaults
     else:
-        print(f'Usage: {sys.argv[0]} "Titanfall materials dir" "MRVN-radiant install dir"')
+        print(f'Usage: {sys.argv[0]} "Titanfall materials dir" "MRVN-radiant working titanfall dir"')
         print('\tif you can\'t find your "Titanfall/materials" folder, extract it from the .vpks')
         sys.exit()
 
     sys.stdout.reconfigure(line_buffering=True)  # for piping print to logfile
-    convert_folder(materials_dir, MRVN_dir, "titanfallonline", True, verbose=True)
+    convert_folder(materials_dir, titanfall_dir, subfolder="dev", recurse=True, verbose=True)
+    convert_folder(materials_dir, titanfall_dir, subfolder="world", recurse=True, verbose=True)
     # TODO: concatenate .shader files together into a top-level .shader for each world/ folder
+    # TODO: generate shadertags .xml for easier navigation
