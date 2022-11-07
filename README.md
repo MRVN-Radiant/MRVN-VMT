@@ -49,26 +49,29 @@ $ python -m pip install -r requirements.txt
 ## Usage
 Substitute your own folders here:
 ```
-$ python3 batch.py ".../extracted Titanfall vpks/materials" ".../Level Editors/MRVN-radiant"
+$ python3 batch.py ".../extracted Titanfall vpks/materials" ".../Level Editors/MRVN-radiant/titanfall2"
 $ deactivate
 ```
 
-> NOTE: deactivate is to close
+> NOTE: `deactivate` is to close the virtual environment (venv)
 
-Unzip `MRVN_dev_textures.zip` into your `MRVN-radiant/titanfallonline` folder for dev textures  
+Unzip `MRVN-radiant_dev_textures.zip` into your `titanfall2` folder for dev textures  
 `scripts/common.shader` is hand-crafted so MRVN-radiant can hide triggers etc. in the viewport
+
+`Northstar_example_mod.zip` extracts into `Titanfall2/R2Northstar/mods` & provides in-game textures  
+
+`MRVN-radiant_editor_models.zip` extracts into `titanfall2` folder & provides models for spawnpoints
+
+> NOTE: requires an experimental Northstar build that adds `.vmt` loading from disk
+> -- you will need to put textures in either `.vpk` or `.rpak` files otherwise
+> -- `.rpak` is recommended for public releases, you may find direct `.vmt` easier for development
 
 
 <!-- Guide for extracting Titanfall files, including decompiling `.bsp`s? -->
 
 
 ## TODOs
- * TrenchBroom support
-   - need to rename each `.tga` to match the targetted `.vmt`
-     this would generate more textures than 1 per `.vtf` 
-   - might be easier add Quake3 `.shader` support to TrenchBroom
-   - or even `.vmt` & `.vtf` support
- * Convert specific `.mip` / image size limit (for filesizes & performance)
+ * Convert specific mip / image size limit (for low filesizes & editor performance)
  * `.vmt` effects in `.shader`
    - BlendModulate
      MRVN-radiant will need to support this in the viewport
@@ -79,4 +82,5 @@ Unzip `MRVN_dev_textures.zip` into your `MRVN-radiant/titanfallonline` folder fo
    - Physically Based Rendering in `.shader`
  * Image & `.shader` -> batch of `.vmt`s
  * Model textures
-   waiting on MRVN `.mdl` support, which is waiting on mdlshit static props & source code release
+   Waiting on MRVN `.mdl` support
+   You can still use other model formats (e.g. `.obj`), but shader paths get funky
