@@ -55,18 +55,6 @@ $ deactivate
 
 > NOTE: `deactivate` is to close the virtual environment (venv)
 
-Unzip `MRVN-radiant_dev_textures.zip` into your `titanfall2` folder for dev textures  
-`scripts/common.shader` is hand-crafted so MRVN-radiant can hide triggers etc. in the viewport
-
-`Northstar_example_mod.zip` extracts into `Titanfall2/R2Northstar/mods` & provides in-game textures  
-
-`MRVN-radiant_editor_models.zip` extracts into `titanfall2` folder & provides models for spawnpoints
-
-> NOTE: requires an experimental Northstar build that adds `.vmt` loading from disk
-> -- you will need to put textures in either `.vpk` or `.rpak` files otherwise
-> -- `.rpak` is recommended for public releases, you may find direct `.vmt` easier for development
-
-
 <!-- Guide for extracting Titanfall files, including decompiling `.bsp`s? -->
 
 
