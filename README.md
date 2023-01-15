@@ -1,9 +1,11 @@
-# MRVN-vmt
-batch `.vmt` -> `.shader` converter for [MRVN-radiant](https://github.com/F1F7Y/MRVN-radiant)  
+# MRVN-VMT
+batch `.vmt` -> `.shader` converter for [MRVN-Radiant](https://github.com/MRVN-Radiant/MRVN-Radiant)  
 Should work for any GtkRadiant or NetRadiant
 
-Gets textures from Titanfall 1 / Titanfall: Online into [MRVN-radiant](https://github.com/F1F7Y/MRVN-radiant)  
+Gets textures from Titanfall 1 / Titanfall: Online into [MRVN-Radiant](https://github.com/MRVN-Radiant/MRVN-Radiant)  
 You don't need this to compile maps, but it sure helps you see what you're doing
+
+See [MRVN-Resource-Pack](https://github.com/MRVN-Radiant/MRVN-Resource-Pack) for dev `textures/`, `shaders/` & `models/`
 
 Uses [VTFLibWrapper by Ganonmaster](https://github.com/Ganonmaster/VTFLibWrapper),
 which provides python bindings for [Nem's VTFLib](https://web.archive.org/web/20191229074421/http://nemesis.thewavelength.net/index.php?p=40)  
@@ -18,7 +20,7 @@ See also:
 Clone this repo:  
 
 ```
-$ git clone https://github.com/snake-biscuits/MRVN-vmt.git
+$ git clone https://github.com/MRVN-Radiant/MRVN-vmt.git
 ```  
 
 ### Windows
@@ -49,7 +51,7 @@ $ python -m pip install -r requirements.txt
 ## Usage
 Substitute your own folders here:
 ```
-$ python3 batch.py ".../extracted Titanfall vpks/materials" ".../Level Editors/MRVN-radiant/titanfall2"
+$ python3 batch.py ".../extracted Titanfall vpks/materials" ".../Level Editors/MRVN-Radiant/Titanfall2"
 $ deactivate
 ```
 
@@ -62,13 +64,13 @@ $ deactivate
  * Convert specific mip / image size limit (for low filesizes & editor performance)
  * `.vmt` effects in `.shader`
    - BlendModulate
-     MRVN-radiant will need to support this in the viewport
+     MRVN-Radiant will need to support this in the viewport
    - Proxies & other procedural materials
    - Water
    - Normal & Specular maps
  * Titanfall2 / Apex Legends `.rpak` support
    - Physically Based Rendering in `.shader`
  * Image & `.shader` -> batch of `.vmt`s
- * Model textures
-   Waiting on MRVN `.mdl` support
+ * Converts `models` textures
+   Waiting on [MRVN-Radiant](https://github.com/MRVN-Radiant/MRVN-Radiant) `.mdl` support  
    You can still use other model formats (e.g. `.obj`), but shader paths get funky
