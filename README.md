@@ -5,6 +5,8 @@ Will not work for GtkRadiant OR NetRadiant! (unique `.shader` flags)
 Gets textures from Titanfall 1 / Titanfall: Online into [MRVN-Radiant](https://github.com/MRVN-Radiant/MRVN-radiant)  
 You don't need this to compile maps, but it sure helps you see what you're doing
 
+See [MRVN-Resource-Pack](https://github.com/MRVN-Radiant/MRVN-Resource-Pack) for dev `textures/`, `shaders/` & `models/`
+
 Uses [VTFLibWrapper by Ganonmaster](https://github.com/Ganonmaster/VTFLibWrapper),
 which provides python bindings for [Nem's VTFLib](https://web.archive.org/web/20191229074421/http://nemesis.thewavelength.net/index.php?p=40)  
 (also used by the [SourceIO](https://github.com/REDxEYE/SourceIO/tree/master/source1/vtf/VTFWrapper) Blender addon)   
@@ -18,7 +20,7 @@ See also:
 Clone this repo:  
 
 ```
-$ git clone https://github.com/snake-biscuits/MRVN-vmt.git
+$ git clone https://github.com/MRVN-Radiant/MRVN-vmt.git
 ```  
 
 ### Windows
@@ -68,6 +70,6 @@ $ deactivate
    - Normal & Specular maps
  * Titanfall2 / Apex Legends `.rpak` support
    - Physically Based Rendering in `.shader`
- * Image & `.shader` -> batch of `.vmt`s (Asset Bakery)
- * Model textures
- * `.vtf` -> `.dds` -> `.rpak`
+ * Image & `.shader` -> batch of `.vmt`s (R1:O Asset Bakery)
+ * Convert `models/` textures
+ * `.vtf` -> `.dds` -> `.rpak` (R2 Asset Bakery)
