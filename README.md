@@ -1,8 +1,8 @@
-# MRVN-vmt
-batch `.vmt` -> `.shader` converter for [MRVN-radiant](https://github.com/F1F7Y/MRVN-radiant)  
-Should work for any GtkRadiant or NetRadiant
+# MRVN-VMT
+batch `.vmt` -> `.shader` converter for [MRVN-Radiant](https://github.com/MRVN-Radiant/MRVN-Radiant)  
+Will not work for GtkRadiant OR NetRadiant! (unique `.shader` flags)
 
-Gets textures from Titanfall 1 / Titanfall: Online into [MRVN-radiant](https://github.com/F1F7Y/MRVN-radiant)  
+Gets textures from Titanfall 1 / Titanfall: Online into [MRVN-Radiant](https://github.com/MRVN-Radiant/MRVN-radiant)  
 You don't need this to compile maps, but it sure helps you see what you're doing
 
 Uses [VTFLibWrapper by Ganonmaster](https://github.com/Ganonmaster/VTFLibWrapper),
@@ -49,7 +49,7 @@ $ python -m pip install -r requirements.txt
 ## Usage
 Substitute your own folders here:
 ```
-$ python3 batch.py ".../extracted Titanfall vpks/materials" ".../Level Editors/MRVN-radiant/titanfall2"
+$ python3 batch.py ".../Titanfall VPK dump/materials" ".../Level Editors/MRVN-Radiant/TitanfallOnline"
 $ deactivate
 ```
 
@@ -62,13 +62,12 @@ $ deactivate
  * Convert specific mip / image size limit (for low filesizes & editor performance)
  * `.vmt` effects in `.shader`
    - BlendModulate
-     MRVN-radiant will need to support this in the viewport
+     MRVN-Radiant will need to support this in the viewport
    - Proxies & other procedural materials
    - Water
    - Normal & Specular maps
  * Titanfall2 / Apex Legends `.rpak` support
    - Physically Based Rendering in `.shader`
- * Image & `.shader` -> batch of `.vmt`s
+ * Image & `.shader` -> batch of `.vmt`s (Asset Bakery)
  * Model textures
-   Waiting on MRVN `.mdl` support
-   You can still use other model formats (e.g. `.obj`), but shader paths get funky
+ * `.vtf` -> `.dds` -> `.rpak`
