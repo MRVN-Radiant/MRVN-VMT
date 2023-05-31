@@ -118,20 +118,20 @@ def convert_folder(materials_dir: str, titanfall_dir: str, subfolder: str = "", 
         for vmt_filename in fnmatch.filter(os.listdir(vmt_folder), "*.vmt"):
             # .vmt
             vmt = VMT.from_file(os.path.join(vmt_folder, vmt_filename))
-            if vmt.basetexture == "" and vmt.tooltexture is None:
+            if vmt.base_texture == "" and vmt.tool_texture is None:
                 if verbose:
                     print(f"!!! {vmt_filename} has no texture !!!")
                 continue
             shader_name = os.path.join("textures", subfolder, folder, vmt_filename[:-4])
             shader_file.write(f"\n{shader_name}\n" + "{\n")
-            texture = vmt.basetexture if vmt.tooltexture is None else vmt.tooltexture
+            texture = vmt.base_texture if vmt.tool_texture is None else vmt.tool_texture
             shader_file.write(f"\t$basetexture {os.path.join('textures', texture)}.tga\n")
-            if vmt.basetexture2 is not None:
-                shader_file.write(f"\t$basetexture2 {os.path.join('textures', vmt.basetexture2)}.tga\n")
+            if vmt.base_texture2 is not None:
+                shader_file.write(f"\t$basetexture2 {os.path.join('textures', vmt.base_texture2)}.tga\n")
             # TODO: convert as much of the shader as possible
             if vmt.is_trans:
                 shader_file.write("\t%trans 1.00\n")  # use texture alpha
-                # shader_file.write("\t{\n\t\tmap " + os.path.join("textures", vmt.basetexture) + ".tga\n")
+                # shader_file.write("\t{\n\t\tmap " + os.path.join("textures", vmt.base_texture) + ".tga\n")
                 # shader_file.write("\t\tblendFunc GL_SRC_ALPHA GL_ONE_MINUS_SRC_ALPHA\n\t}\n")
             shader_file.write("}\n")
             # .vtf
@@ -142,10 +142,10 @@ def convert_folder(materials_dir: str, titanfall_dir: str, subfolder: str = "", 
                 continue
             # vtf_to_tga(vtf_filename, filename(os.path.join(MRVN_dir, MRVN_game), shader_name, "tga"))
             # ^ rename vtf to shader_name, good for trenchbroom
-            if vmt.basetexture != "":
-                vtf_to_tga(vtf_filename, filename(textures_dir, vmt.basetexture, "tga"))
-            if vmt.tooltexture is not None:
-                vtf_to_tga(vtf_filename, filename(textures_dir, vmt.tooltexture, "tga"))
+            if vmt.base_texture != "":
+                vtf_to_tga(vtf_filename, filename(textures_dir, vmt.base_texture, "tga"))
+            if vmt.tool_texture is not None:
+                vtf_to_tga(vtf_filename, filename(textures_dir, vmt.tool_texture, "tga"))
             count += 1
         shader_file.close()
         if verbose:
@@ -172,12 +172,12 @@ def convert_folder_trenchbroom(materials_dir: str, tga_dir: str, subfolder: str 
         for vmt_filename in fnmatch.filter(os.listdir(vmt_folder), "*.vmt"):
             # .vmt
             vmt = VMT.from_file(os.path.join(vmt_folder, vmt_filename))
-            if vmt.basetexture == "" and vmt.tooltexture is None:
+            if vmt.base_texture == "" and vmt.tool_texture is None:
                 if verbose:
                     print(f"!!! {vmt_filename} has no texture !!!")
                 continue
             shader_name = os.path.join("textures", "world", subfolder, folder, vmt_filename[:-4])
-            texture = vmt.basetexture if vmt.tooltexture is None else vmt.tooltexture
+            texture = vmt.base_texture if vmt.tool_texture is None else vmt.tool_texture
             # .vtf
             vtf_filename = filename(materials_dir, texture, "vtf")
             if not os.path.exists(vtf_filename):
@@ -196,7 +196,7 @@ if __name__ == "__main__":
     import sys
 
     # materials_dir = "E:/Mod/TitanfallOnline/TitanFallOnline/assets_dump/materials"
-    # titanfall_dir = "E:/Mod/_tools/Source Engine - Respawn/MRVN-radiant-3db242a-Windows-x86_64/titanfallonline"
+    # titanfall_dir = "E:/Mod/_tools/Source Engine - Respawn/MRVN-Radiant/TitanfallOnline"
     if len(sys.argv) == 3:
         materials_dir, titanfall_dir = sys.argv[1:]
     # elif len(sys.argv) == 1:
