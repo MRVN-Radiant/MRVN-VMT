@@ -24,7 +24,7 @@ __version__ = "1.1.0"
 
 patterns = {"alpha_test": re.compile(r'\s"\$alphatest"\s1'),
             "base_texture": re.compile(r'\s"\$basetexture"\s"(.*)"'),
-            "base_texture2": re.compile(r'\s"\$basetexture2"\s"(.*)"'),
+            "base_texture_2": re.compile(r'\s"\$basetexture2"\s"(.*)"'),
             "compile_nodraw": re.compile(r'\s"\%compilenodraw"\s1'),
             "decal": re.compile(r'\s"\$decal"\s1'),
             "shader": re.compile(r'"(.*)"'),
@@ -40,7 +40,7 @@ shader_vertex_type = {"Basic": "unlit",
 
 class VMT:
     base_texture: str = ""
-    base_texture2: str = None
+    base_texture_2: str = None
     is_trans: bool = False
     shader_type: str = ""
     tool_texture: str = None
@@ -65,9 +65,9 @@ class VMT:
                     if check in ("alpha_test", "translucent"):
                         out.is_trans = True
                     elif check == "base_texture":
-                        out.base_texture = match.groups()[0]
-                    elif check == "base_texture2":
-                        out.base_texture2 = match.groups()[0]
+                        out.base_texture = match.groups()[0].replace("\\", "/")
+                    elif check == "base_texture_2":
+                        out.base_texture_2 = match.groups()[0].replace("\\", "/")
                     elif check == "compile_nodraw":
                         out.compile_flags.add("nodraw")
                     elif check == "decal":
@@ -75,7 +75,7 @@ class VMT:
                     elif check == "shader":
                         out.shader = shader_vertex_type[match.groups()[0]]
                     elif check == "tool_texture":
-                        out.tool_texture = match.groups()[0]
+                        out.tool_texture = match.groups()[0].replace("\\", "/")
                     else:
                         raise NotImplementedError(f"i forgor {check}")
         if out.is_trans:
@@ -93,7 +93,7 @@ def vtf_to_tga(vtf_filename: str, tga_filename: str):
 
 
 def filename(folder: str, base: str, ext: str) -> str:
-    return os.path.join(folder, f"{base}.{ext}")
+    return os.path.join(folder, f"{base}.{ext}").replace("\\", "/")
 
 
 # MRVN-Radiant
@@ -125,9 +125,11 @@ def convert_folder(materials_dir: str, titanfall_dir: str, subfolder: str = "", 
             shader_name = os.path.join("textures", subfolder, folder, vmt_filename[:-4])
             shader_file.write(f"\n{shader_name}\n" + "{\n")
             texture = vmt.base_texture if vmt.tool_texture is None else vmt.tool_texture
-            shader_file.write(f"\t$basetexture {os.path.join('textures', texture)}.tga\n")
-            if vmt.base_texture2 is not None:
-                shader_file.write(f"\t$basetexture2 {os.path.join('textures', vmt.base_texture2)}.tga\n")
+            bt_path = os.path.join("textures", texture).replace("\\", "/")
+            shader_file.write(f"\t$basetexture {bt_path}.tga\n")
+            if vmt.base_texture_2 is not None:
+                bt2_path = os.path.join("textures", vmt.base_texture_2).replace("\\", "/")
+                shader_file.write(f"\t$basetexture_2 {bt2_path}.tga\n")
             # TODO: convert as much of the shader as possible
             if vmt.is_trans:
                 shader_file.write("\t%trans 1.00\n")  # use texture alpha
@@ -144,6 +146,8 @@ def convert_folder(materials_dir: str, titanfall_dir: str, subfolder: str = "", 
             # ^ rename vtf to shader_name, good for trenchbroom
             if vmt.base_texture != "":
                 vtf_to_tga(vtf_filename, filename(textures_dir, vmt.base_texture, "tga"))
+            if vmt.base_texture_2 != "":
+                vtf_to_tga(vtf_filename, filename(textures_dir, vmt.base_texture_2, "tga"))
             if vmt.tool_texture is not None:
                 vtf_to_tga(vtf_filename, filename(textures_dir, vmt.tool_texture, "tga"))
             count += 1
