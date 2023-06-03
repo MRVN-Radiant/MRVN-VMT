@@ -22,7 +22,8 @@ __version__ = "1.1.0"
 # TODO: Titanfall 2 rpak .json materials -> .shader
 
 
-patterns = {"alpha_test": re.compile(r'\s"\$alphatest"\s1'),
+patterns = {"above_water": re.compile(r'\s"?$abovewater"? "?(0|1)"?'),
+            "alpha_test": re.compile(r'\s"\$alphatest"\s1'),
             "base_texture": re.compile(r'\s"\$basetexture"\s"(.*)"'),
             "base_texture_2": re.compile(r'\s"\$basetexture2"\s"(.*)"'),
             "compile_nodraw": re.compile(r'\s"\%compilenodraw"\s1'),
@@ -36,12 +37,17 @@ shader_vertex_type = {"Basic": "unlit",
                       "Refract": "unlitts",
                       "UnlitTwoTexture": "unlit",
                       "VertexLitGeneric": "unlit",  # sometimes unlitts
-                      "Water": "litflat"}  # sometimes unlit
+                      "Water": "litflat"}
+# NOTE: Water *_beneath ($abovewater 0) is unlit
+# TODO: indentify conditions for unlitts VertexLitGeneric
+# -- some $alphatest 1 model vmts are unlit
+# -- some materials w/ no transparency flags are unlitts
 
 
 class VMT:
+    above_water: bool = True  # special case when False
     base_texture: str = ""
-    base_texture_2: str = None
+    base_texture_2: str = None  # *_bm only
     is_trans: bool = False
     shader_type: str = ""
     tool_texture: str = None
@@ -65,6 +71,8 @@ class VMT:
                         continue
                     if check in ("alpha_test", "translucent"):
                         out.is_trans = True
+                    elif check == "above_water":
+                        out.above_water = bool(int(match.groups()[0]))
                     elif check == "base_texture":
                         out.base_texture = match.groups()[0].replace("\\", "/")
                     elif check == "base_texture_2":
@@ -82,6 +90,8 @@ class VMT:
                         raise NotImplementedError(f"i forgor {check}")
         if out.is_trans:
             out.shader = "unlitts"
+        if out.shader_type == "Water" and not out.above_water:
+            out.shader = "unlit"
         return out
 
 
