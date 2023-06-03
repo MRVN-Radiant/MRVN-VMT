@@ -27,7 +27,7 @@ patterns = {"alpha_test": re.compile(r'\s"\$alphatest"\s1'),
             "base_texture_2": re.compile(r'\s"\$basetexture2"\s"(.*)"'),
             "compile_nodraw": re.compile(r'\s"\%compilenodraw"\s1'),
             "decal": re.compile(r'\s"\$decal"\s1'),
-            "shader": re.compile(r'"(.*)"'),
+            "shader": re.compile(r'"?(.+)"?'),
             "tool_texture": re.compile(r'\s%tooltexture\s"(.*)"'),
             "translucent": re.compile(r'\s"\$translucent"\s"1"')}
 
@@ -35,7 +35,8 @@ shader_vertex_type = {"Basic": "unlit",
                       "LightmappedGeneric": "litbump",
                       "Refract": "unlitts",
                       "UnlitTwoTexture": "unlit",
-                      "VertexLitGeneric": "unlit"}
+                      "VertexLitGeneric": "unlit",  # sometimes unlitts
+                      "Water": "litflat"}  # sometimes unlit
 
 
 class VMT:
@@ -73,7 +74,8 @@ class VMT:
                     elif check == "decal":
                         out.compile_flags.add("decal")
                     elif check == "shader":
-                        out.shader = shader_vertex_type[match.groups()[0]]
+                        out.shader_type == match.groups()[0]
+                        out.shader = shader_vertex_type[out.shader_type]
                     elif check == "tool_texture":
                         out.tool_texture = match.groups()[0].replace("\\", "/")
                     else:
@@ -122,19 +124,19 @@ def convert_folder(materials_dir: str, titanfall_dir: str, subfolder: str = "", 
                 if verbose:
                     print(f"!!! {vmt_filename} has no texture !!!")
                 continue
+            # TODO: convert as much of the shader as possible
             shader_name = os.path.join("textures", subfolder, folder, vmt_filename[:-4])
             shader_file.write(f"\n{shader_name}\n" + "{\n")
             texture = vmt.base_texture if vmt.tool_texture is None else vmt.tool_texture
+            # TODO: add more shaders to MRVN-Radiant/tools/remap/source/games.cpp
+            # shader_file.write(f'\t"$shadertype" "{vmt.shader_type}"\n')
             bt_path = os.path.join("textures", texture).replace("\\", "/")
             shader_file.write(f"\t$basetexture {bt_path}.tga\n")
             if vmt.base_texture_2 is not None:
                 bt2_path = os.path.join("textures", vmt.base_texture_2).replace("\\", "/")
                 shader_file.write(f"\t$basetexture_2 {bt2_path}.tga\n")
-            # TODO: convert as much of the shader as possible
             if vmt.is_trans:
                 shader_file.write("\t%trans 1.00\n")  # use texture alpha
-                # shader_file.write("\t{\n\t\tmap " + os.path.join("textures", vmt.base_texture) + ".tga\n")
-                # shader_file.write("\t\tblendFunc GL_SRC_ALPHA GL_ONE_MINUS_SRC_ALPHA\n\t}\n")
             shader_file.write("}\n")
             # .vtf
             vtf_filename = filename(materials_dir, texture, "vtf")
