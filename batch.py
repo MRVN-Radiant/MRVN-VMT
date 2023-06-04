@@ -28,7 +28,7 @@ patterns = {"above_water": re.compile(r'\s"?$abovewater"? "?(0|1)"?'),
             "base_texture_2": re.compile(r'\s"\$basetexture2"\s"(.*)"'),
             "compile_nodraw": re.compile(r'\s"\%compilenodraw"\s1'),
             "decal": re.compile(r'\s"\$decal"\s1'),
-            "shader": re.compile(r'"?(.+)"?'),
+            "shader": re.compile(r'"?([a-zA-Z_]+)"?'),
             "tool_texture": re.compile(r'\s%tooltexture\s"(.*)"'),
             "translucent": re.compile(r'\s"\$translucent"\s"1"')}
 
@@ -82,7 +82,7 @@ class VMT:
                     elif check == "decal":
                         out.compile_flags.add("decal")
                     elif check == "shader":
-                        out.shader_type == match.groups()[0]
+                        out.shader_type = match.groups()[0]
                         out.shader = shader_vertex_type[out.shader_type]
                     elif check == "tool_texture":
                         out.tool_texture = match.groups()[0].replace("\\", "/")
@@ -218,7 +218,7 @@ if __name__ == "__main__":
     # elif len(sys.argv) == 1:
     #     pass  # use defaults
     else:
-        print(f'Usage: {sys.argv[0]} "Titanfall materials dir" "MRVN-radiant working titanfall dir"')
+        print(f'Usage: {sys.argv[0]} "Titanfall materials dir" "MRVN-Radiant TitanfallOnline dir"')
         print('\tif you can\'t find your "Titanfall/materials" folder, extract it from the .vpks')
         sys.exit()
 
